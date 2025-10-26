@@ -4,8 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum UserType {
-    DEFAULT,
-    ADMIN;
+    DEFAULT("Default"),
+    ADMIN("Admin");
 
-    private String name;
+    private final String name;
+
+    UserType(String name) {
+        this.name = name;
+    }
 }
