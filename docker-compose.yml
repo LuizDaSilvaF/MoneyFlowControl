@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  moneyflowcontrol-api:
+    build: .
+    container_name: moneyflowcontrol-api
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      moneyflowcontrol-postgres:
+        condition: service_healthy
+    networks:
+      - moneyflowcontrol-network
+
+  moneyflowcontrol-postgres:
+    image: postgres:16-alpine
+    container_name: moneyflowcontrol-postgres
+    environment:
+      POSTGRES_DB: ${DB_POSTGRES_NAME}
+      POSTGRES_USER: ${DB_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
+    ports:
+      - "${DB_POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - moneyflowcontrol-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_POSTGRES_USER} -d ${DB_POSTGRES_NAME}" ]
+      interval: 10s
+      retries: 10
+      timeout: 100s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  moneyflowcontrol-network:
+    driver: bridge
